@@ -1,0 +1,779 @@
+<html>
+
+<head>
+<title>ScannerBe Manual</title>
+</head>
+
+<body bgcolor="#FFFFFF">
+
+<table border="0" width="100%">
+  <tr>
+    <td width="62%" valign="middle"><h1>ScannerBe Manual</h1>
+    </td>
+    <td width="38%"><p align="right"><small><small>Copyright © Jim Moy 1998, All Rights
+    Reserved</small></small></td>
+  </tr>
+</table>
+
+<blockquote>
+  <p><small><small>Manual Version 1.0b2</small></small></p>
+  <p>ScannerBe is an API for applications that use image capture devices. In particular, it
+  was designed for flatbed desktop scanners. By implementing the ScannerBe interface, an
+  application can take advantage of multiple scanner makes and models without having to
+  write scanner-dependent code. By writing a ScannerBe add-on, a scanner can be made
+  available to these applications.</p>
+  <p>This &quot;manual&quot; is for developers as well as technically oriented users. There
+  is an overview from both user and developer perspectives, a reference section for
+  developers, and descriptions of the examples in the ScannerBe SDK.</p>
+  <table border="0" width="91%">
+    <tr>
+      <td width="18%" valign="top"><small><strong>Topics:</strong></small></td>
+      <td width="28%" valign="top"><small><a href="#User's Experience">User Experience</a></small></td>
+      <td width="29%" valign="top"><small><a href="#Simple Application">Simple Application</a></small></td>
+      <td width="26%" valign="top"><small><a href="#Add-on Notes">Add-on Notes</a></small></td>
+    </tr>
+    <tr>
+      <td width="18%" valign="top"></td>
+      <td width="28%" valign="top"><small><a href="#More Details">More Details</a></small></td>
+      <td width="29%" valign="top"><small><a href="#More Control">More Control</a></small></td>
+      <td width="26%" valign="top"><small><a href="#License">License</a></small></td>
+    </tr>
+    <tr>
+      <td width="101%" colspan="4" valign="top"></td>
+    </tr>
+    <tr>
+      <td width="18%" valign="top"><small><strong>Examples:</strong></small></td>
+      <td width="28%" valign="top"><small><a href="#Command Line Example">Command Line</a></small></td>
+      <td width="29%" valign="top"><small><a href="#Image Editor Example">Image Editor</a></small></td>
+      <td width="26%" valign="top"><small><a href="#Becasso Add-on Example">Becasso Add-on</a></small></td>
+    </tr>
+    <tr>
+      <td width="101%" colspan="4" valign="top"></td>
+    </tr>
+    <tr>
+      <td width="18%" valign="top"><small><strong>Reference:</strong></small></td>
+      <td width="28%" valign="top"><small><a href="#scan_get_version">scan_get_version</a></small></td>
+      <td width="29%" valign="top"><small><a href="#scan_get_settings">scan_get_settings</a></small></td>
+      <td width="26%" valign="top"><small><a href="#scan_open_image">scan_open_image</a></small></td>
+    </tr>
+    <tr>
+      <td width="18%" valign="top"></td>
+      <td width="28%" valign="top"><small><a href="#scan_get_addons">scan_get_addons</a></small></td>
+      <td width="29%" valign="top"><small><a href="#scan_put_settings">scan_put_settings</a></small></td>
+      <td width="26%" valign="top"><small><a href="#scan_close_image">scan_close_image</a></small></td>
+    </tr>
+    <tr>
+      <td width="18%" valign="top"></td>
+      <td width="28%" valign="top"><small><a href="#scan_open">scan_open</a></small></td>
+      <td width="29%" valign="top"><small><a href="#scan_get_one_setting">scan_get_one_setting</a></small></td>
+      <td width="26%" valign="top"><small><a href="#scan_data">scan_data</a></small></td>
+    </tr>
+    <tr>
+      <td width="18%" valign="top"></td>
+      <td width="28%" valign="top"><small><a href="#scan_close">scan_close</a></small></td>
+      <td width="29%" valign="top"><small><a href="#scan_put_one_setting">scan_put_one_setting</a></small></td>
+      <td width="26%" valign="top"><small><a href="#scan_adf_ready">scan_adf_ready</a></small></td>
+    </tr>
+    <tr>
+      <td width="18%" valign="top"></td>
+      <td width="28%" valign="top"><small><a href="#scan_get_capabilities">scan_get_capabilities</a></small></td>
+      <td width="29%" valign="top"><small><a href="#scan_start">scan_start</a></small></td>
+      <td width="26%" valign="top"><a href="#scan_error_message"><small>scan_error_message</small></a></td>
+    </tr>
+  </table>
+</blockquote>
+
+<h2><a name="Overview">Overview</a></h2>
+
+<blockquote>
+  <p>For those familiar with scanning APIs, ScannerBe is somewhat of a cross between the
+  Adobe Photoshop &quot;acquire&quot; plug-in interface, and the <a
+  href="http://www.twain.org">TWAIN</a> scanning standard. It can act as a simple driver
+  abstraction layer, or as a typical image editor plug-in with a user interface.</p>
+  <p>ScannerBe was designed to be easy for developers to implement, but also provide enough
+  flexibility for reasonably sophisticated scanning applications. Various plug-in
+  architectures provided by image editing applications such as Photoshop are fine for simple
+  capture operations, but don't provide enough flexibility if, for example, you wanted to
+  base a scanning utility on the API. More general APIs such as <a
+  href="http://www.twain.org">TWAIN</a> or <a href="http://www.mostang.com/sane">SANE</a>,
+  or even some of the manufacturer SDKs for their scanners provide quite a bit of
+  flexibility, but there is also a steeper learning curve for implementation. Experience has
+  shown that the addition of these features is typically an afterthought, and any learning
+  curve which cannot be disguised in as a couple days work on &quot;some other feature&quot;
+  is not generally well received.</p>
+  <p>The layer of code sandwiched between the application and the capture device is
+  implemented as add-ons. Throughout the rest of this document these add-ons may be referred
+  to as ScannerBe add-ons, scanner add-ons, or just add-ons.</p>
+</blockquote>
+
+<h2><a name="User's Experience">User's Experience</a></h2>
+
+<blockquote>
+  <p>If you are distributing an application that makes use of the ScannerBe API, the user
+  doesn't have to see anything specific to ScannerBe except for your &quot;Scan&quot; menu
+  item, button, or whatever UI feature which provides access to ScannerBe, and maybe a
+  preferences applet to choose from more than one scanner. If ScannerBe is already installed
+  on the system and is a recent enough version, you're already done with its installation.</p>
+  <p>ScannerBe can be installed separately with its own installer, or as part of an
+  application's installer. A shared library goes in the ~/config/lib directory, and one or
+  more add-ons go in the ~/config/add-ons/Scanner directory. The individual add-ons may
+  require other files be installed as well, for example, any device drivers required. </p>
+  <p>If any of the ScannerBe add-ons provide a user interface, a preferences applet may also
+  be installed. The applet allows the user to choose the &quot;current&quot; scanner. If
+  none of the add-ons provide a user interface, then the applet is not needed. In this case,
+  the application can either specify the required add-on by hard-coding it, or provide its
+  own interface for selecting it.</p>
+</blockquote>
+
+<h2><a name="More Details">More Details</a></h2>
+
+<blockquote>
+  <p>The libscanbe shared library is what the application links. For the most part, it just
+  passes the C-based API calls down to the add-on, and provides some convenience functions
+  for the developer. The real meat of ScannerBe is in the reference section below, which is
+  how the parties on both sides of the ScannerBe library agree to handle the transfer of an
+  image.</p>
+  <p>An application links against the shared library, which then loads the appropriate
+  add-ons on behalf of the API. In a typical image editor scenario, the application has
+  provided a &quot;Scanner...&quot; item in its File menu. The add-on corresponding to the
+  current scanner is loaded when this item is selected and the add-on interface is brought
+  up. The user previews, adjusts, crops, etc., the image to their satisfaction and then
+  clicks a &quot;Scan&quot; button (or whatever the feature is called in the given
+  interface) the image appears in an image editing window, and then the ScannerBe add-on is
+  either dismissed, or left around for another scan, according to the application's
+  interface conventions.</p>
+  <p>Arbitrary restrictions in the library are avoided, to allow the add-on the most
+  flexibility for the features of its particular device. This also places a bit more of a
+  burden on the add-on writer to &quot;get it right,&quot; for example, there is nothing in
+  libscanbe preventing the application from trying to open multiple instances of a given
+  add-on.</p>
+  <p>Libscanbe links against Jon Watte's libprefs library, so any installation must make
+  sure it is present. For application writers, the interface is obtained by including
+  ScannerBe.h, and linking libscanbe.so. They may also be interested in the ScanGlue.cpp and
+  .h files for the glue code. Add-on writers will need ScanAddOn.h, which has the typedefs
+  for the hooks they'll need to write, plus the declarations for the routines they'll need
+  to export.</p>
+</blockquote>
+
+<h2><a name="Simple Application">Simple Application</a></h2>
+
+<blockquote>
+  <p>Some glue code is provided in the SDK in module ScanGlue, as an example of the use of
+  the ScannerBe functions, and as a convenience for the developer in a hurry. With the glue
+  code, a simple image editor can provide ScannerBe functionality with one function call:</p>
+  <pre>BBitmap* GetScannerImage();</pre>
+  <p>The GetScannerImage function will invoke the user-selected ScannerBe add-on, wait until
+  the user has selected and scanned an image, and return it to the application in the form
+  of a BBitmap. Since an add-on with a user interface may be modeless, one suggestion is to
+  place this call in an overridden BLooper, which then allows your application to continue
+  processing user input until a scan is started and finished.The BLooper can then notify
+  whatever object is interested in the bitmap that it is ready.</p>
+  <p>A quick look at the glue code shows that GetScannerImage simply wraps a scan loop with
+  a few other ScannerBe function calls. It is a good place to start to get a bit more
+  control over the API. For example, if an application wanted to leave the add-on's user
+  interface up for further scans or do some other processing, the glue code could be
+  modified to suit..</p>
+  <p>If you want more control over the scanning process, you can use the ScannerBe API
+  directly, which is still straightforward, but allows more flexibility. See the Skeeter
+  application for an example of the type of thing that can be done; it is written entirely
+  on top of the ScannerBe API.</p>
+</blockquote>
+
+<h2><a name="More Control">More Control</a></h2>
+
+<blockquote>
+  <p>Here is an outline of a typical scan using the ScannerBe native interface, if you're
+  not doing anything interactive (using a &quot;driver mode&quot; add-on). For example, if
+  you just want a full page of 300dpi thresholded data to do OCR or something like that.
+  (without error checking, parameters, or other such details) you would say:</p>
+  <pre>
+  1.  scan_open();
+  2.  scan_put_settings();
+  3.  scan_get_settings();
+  4.  scan_open_image();
+  5.  while( scan_data() != SCAN_DATA_END )
+  6.      process_data();
+  7.  scan_close_image();
+  8.  scan_close();
+</pre>
+  <p>The scan sequence described above is fleshed out in more detail in the CommandLine
+  example, described later. The steps are as follows:</p>
+  <table border="0" width="82%">
+    <tr>
+      <td width="4%" valign="top"></td>
+      <td width="7%" valign="top"><small>1.</small></td>
+      <td width="98%"><small>Open a ScannerBe add-on. This can be selected either by name, if
+      you know you want a particular scanner ahead of time, or by the user, if they've used the
+      Scanner prefs applet to select a scanner. The add-on is then loaded, and you get back a </small><font
+      SIZE="1">scan_id </font><small>identifier which you pass to the rest of the API functions.</small></td>
+    </tr>
+    <tr>
+      <td width="4%" valign="top"></td>
+      <td width="7%" valign="top"><small>2.</small></td>
+      <td width="98%"><small>A convenience function in the API allows you to fill in a structure
+      with all of the scan parameters, and send them down to the add-on all at once. These
+      include image type, resolution, scan window, etc. </small></td>
+    </tr>
+    <tr>
+      <td width="4%" valign="top"></td>
+      <td width="7%" valign="top"><small>3.</small></td>
+      <td width="98%"><small>Another convenience function, this allows you to query the add-on
+      for the kind of image that will be returned, based on the settings given in the previous
+      step. These are width, height, and bytes per row of image data.</small></td>
+    </tr>
+    <tr>
+      <td width="4%" valign="top"></td>
+      <td width="7%" valign="top"><small>4.</small></td>
+      <td width="98%"><small>This step simply lets the add-on know that you're ready to start
+      reading image data. Having the open/close image pair is mostly for the convenience of the
+      add-on writer, and makes it explicit that you're done with this scan.</small></td>
+    </tr>
+    <tr>
+      <td width="4%" valign="top"></td>
+      <td width="7%" valign="top"><small>5.</small></td>
+      <td width="98%"><small>The scan loop reads buffers of data from the add-on. You specify
+      how much data you want at a time. This is a good time to check for user cancellation,
+      update progress indicators, etc.</small></td>
+    </tr>
+    <tr>
+      <td width="4%" valign="top"></td>
+      <td width="7%" valign="top"><small>6.</small></td>
+      <td width="98%"><small>You process the image data in this step. Maybe you just want to
+      write it to a file. Maybe you want to pad it, process it, sample it, whatever.</small></td>
+    </tr>
+    <tr>
+      <td width="4%" valign="top"></td>
+      <td width="7%" valign="top"><small>7.</small></td>
+      <td width="98%"><small>You're done with this image.</small></td>
+    </tr>
+    <tr>
+      <td width="4%" valign="top"></td>
+      <td width="7%" valign="top"><small>8.</small></td>
+      <td width="98%"><small>Done with the scan, unload the add-on.</small></td>
+    </tr>
+  </table>
+  <p>The following is an outline of how you might use the API in an image editor to capture
+  an image with a ScannerBe add-on that supports a user interface, allowing the user to
+  adjust the parameters of the scan.</p>
+  <pre>
+  scan_open();
+  scan_start();
+  scan_get_settings();
+  scan_open_image();
+  while( scan_data() != SCAN_DATA_END )
+      process_data();
+  scan_close_image();
+  scan_close();
+</pre>
+  <p>The variation from the previous example is the scan_start() call, which informs the
+  add-on that it should put up its interface and wait for the user. In the interface there
+  should be a &quot;trigger&quot; such as a &quot;Scan&quot; button or its equivalent which
+  kicks off the scanning process. When that trigger has occurred, the call returns and the
+  rest of the ScannerBe functions can be called to retrieve the image.</p>
+  <p>Note that scan_start() doesn't return until the user indicates they're satisfied with
+  the settings, which means that the calling application will either have to place the
+  sequence in a separate thread (or BLooper, as suggested previously) so it can continue to
+  process messages while the user is interacting with the add-on. Another option is to put
+  up a modal dialog window, but that's more &quot;yucky.&quot;</p>
+  <p>Also note there is no scan_put_settings() call. If a ScannerBe add-on puts up a user
+  interface, you may assume that it will make all settings appropriately based on the user's
+  interaction. The scan_get_settings() call is then useful to find out what the user did,
+  and whether you want to continue based on that input.</p>
+  <p>More help can be found in the examples included in the SDK, and are described below.
+  They're the best place to go next, to accompany the following reference section.</p>
+</blockquote>
+
+<h2>Reference</h2>
+
+<h4>void <a name="scan_get_version">scan_get_version</a>( scan_version *version );</h4>
+
+<blockquote>
+  <p>Retrieves the version of the libscanbe shared library that has been loaded. Compare the
+  returned values to the constants in ScannerBe.h to determine if you should call any of the
+  other functions. In general, if the library is older than the header file constants by
+  only the incr field, then only bug fixes have been made to the library and you should
+  still be able to use it. If the major or minor fields are older, then you probably want to
+  warn the user to update to a newer version of the library.</p>
+  <p>Another alternative would be to have them re-install your software, which is probably
+  going to be installing libscanbe anyways. In this scenario, your user may have installed
+  some other software which placed an older version.</p>
+  <p>Note: the version of the scanner add-on is returned by the scan_open() function, and
+  can also be found using the scan_get_addons() function.</p>
+</blockquote>
+
+<h4>status_t <a name="scan_get_addons">scan_get_addons</a>( ScanAddonProc callback, void
+*data );</h4>
+
+<blockquote>
+  <p>Traverses the scanner add-on directory, calling the function referenced in the callback
+  parameter for each valid add-on file. The directory is ~/config/add-ons/Scanner, and
+  add-on files are ones with a BEOS:TYPE attribute of
+  &quot;application/x-be-executable&quot;.</p>
+  <p>The ScanAddonProc function type includes as one of its parameters a pointer to a
+  structure which has the path to the file, flags indicating whether it supports the two
+  modes of operation, and some information which can be displayed to the user.</p>
+  <p>This function is intended for information gathering only. For example, an application
+  which wants to use only the driver mode add-ons can look at the flags for the add-on which
+  indicate whether it supports a user interface. An add-on must be loaded using the
+  scan_open() call to create a valid scan session. Manipulating the add-on once you've
+  located it with this function does not substitute for the API call.</p>
+</blockquote>
+
+<h4>status_t <a name="scan_open">scan_open</a>( const char* name, scan_id* id,
+scan_version *version );</h4>
+
+<blockquote>
+  <p>Opens a scanner add-on and prepares to perform a scan. The name parameter specifies a
+  particular add-on to use, otherwise if NULL it uses the add-on selected by the user in the
+  Scanner preferences applet. Any scan session opened by this call should be balanced with a
+  call to scan_close().</p>
+  <p>When the return code is B_OK, the add-on has been opened successfully, and an
+  identifier for the new scan session has been placed in the location referenced by the
+  parameter id. This identifier is what you pass to the rest of the functions in the API and
+  uniquely identifies the scan session. If the same add-on is specified in another
+  scan_open() call before the first one has been scan_close()'d, it opens a separate scan
+  session if the add-on supports it.</p>
+  <p>The values placed in the structure referenced by the version parameter are the values
+  specified by the add-on. Contrasted to the values returned in scan_get_version(), which
+  return the values for the libscanbe shared library. You may pass NULL if you don't need
+  the information.</p>
+  <p>Names available from the installed add-ons can be found via the scan_get_addons()
+  function by passing a callback function which opens the add-on and queries its names with
+  its publish_scanners() routine.</p>
+</blockquote>
+
+<h4>status_t <a name="scan_close">scan_close</a>( const scan_id id );</h4>
+
+<blockquote>
+  <p>Closes the scan session associated with id, and unloads the add-on. If
+  scan_open_image() has been called, then scan_close_image() is called for you. After making
+  this call, the scan session identified by id no longer references anything meaningful, and
+  the API calls will return an error if you pass it to them.</p>
+</blockquote>
+
+<h4>status_t <a name="scan_get_capabilities">scan_get_capabilities</a>( const scan_id id,
+scan_settings_mask *mask );</h4>
+
+<blockquote>
+  <p>Returns a set of flags in the location referenced by the parameter mask which indicate
+  the kinds of settings the scanner add-on supports. The scan_setting_id constants represent
+  the bits in the mask. Once you know which ones are supported, you can make appropriate use
+  of the put/get settings functions below.</p>
+</blockquote>
+
+<h4>status_t <a name="scan_get_settings">scan_get_settings</a>( const scan_id id,
+scan_settings *current, scan_settings *minimum, scan_settings *maximum );</h4>
+
+<blockquote>
+  <p>Returns the current settings for the given scan session, and the minimum and maximum
+  settings supported by the current scanner add-on. You can pass NULL to any of the
+  parameters if you don't need that information.</p>
+  <p>All settings are typed according to the corresponding field type in the scan_settings
+  structure. Their meanings are described in the scan_get_one_setting() function section
+  below.</p>
+  <p>This is actually implemented in libscanbe as a series of calls to the
+  scan_get_one_setting() function, so you should make the appropriate tradeoffs between the
+  settings you are interested in, and any performance issues associated with the device with
+  which you are communicating. For example, continuously querying the image extents while
+  you are dragging a scaling slider around is probably best done with calls to
+  scan_get_one_setting() rather than using this function, because you don't care about how
+  the other settings change, and doing so would take up quite a bit more time.</p>
+</blockquote>
+
+<h4>status_t <a name="scan_put_settings">scan_put_settings</a>( const scan_id id,
+scan_settings *settings, scan_settings_mask *mask );</h4>
+
+<blockquote>
+  <p>This is primarily a convenience function for dumping an entire group of settings to the
+  add-on with one call. The scan_settings structure contains all the fields which can be
+  filled in. Note though, that some of the fields are meant to be read-only, returned by
+  scan_get_settings(). Any fields which are not supported by the add-on, as returned by
+  scan_get_capabilities(), will be ignored.</p>
+  <p>The location referenced by the mask parameter will receive flags indicating which
+  settings have changed as a result of the operation. See scan_put_one_setting() for more
+  details.</p>
+  <p>Like scan_get_settings(), this is implemented in libscanbe as a series of calls to
+  scan_put_one_setting(), and so should not be used with indifference to performance
+  tradeoffs.</p>
+</blockquote>
+
+<h4>status_t <a name="scan_get_one_setting">scan_get_one_setting</a>( const scan_id id,
+const scan_setting_id setting, const scan_setting_kind setting_kind, scan_value *value_ptr
+);</h4>
+
+<blockquote>
+  <p>Retrieves a setting from the scanner add-on. This may be a current value for the scan
+  session, or a minimum/maximum value, depending on the constant passed to setting_kind.</p>
+  <p>The value_ptr parameter is a pointer to the location where the returned value will be
+  stored. It's type can be found by looking at the field in the scan_settings structure
+  which corresponds to the setting you are querying; use the field in the scan_value union
+  which matches that type. For example:</p>
+  <pre>
+  scan_value value;
+  scan_get_one_setting( id, SCAN_SETTING_AREA,SCAN_SETTING_CURRENT, &amp;value );
+  scan_rect rect = value.rect;
+</pre>
+  <p>will place the current scan window in the rect variable. The following list describes
+  the meaning of the scan_setting_id constants:</p>
+  <table border="0" width="90%">
+    <tr>
+      <td width="38%" valign="top"><strong><small>SCAN_SETTING_AREA</small></strong></td>
+      <td width="62%"><small>Specifies what portion of the scanner bed should be scanned. It is
+      in 300dpi coordinates. This value is absolute, i.e., it does not change with the
+      resolution and scaling settings, which are reflected in the width and height values below.
+      The min/max settings are the smallest and largest window that may be specified,
+      respectively</small></td>
+    </tr>
+    <tr>
+      <td width="38%"></td>
+      <td width="62%"></td>
+    </tr>
+    <tr>
+      <td width="38%" valign="top"><strong><small>SCAN_SETTING_IMAGETYPE</small></strong></td>
+      <td width="62%"><small>One of the scan_type constants, specifying what kind of data will
+      be returned from the scanner. The image data formats are described in the section for </small><font
+      SIZE="1">scan_data().</font></td>
+    </tr>
+    <tr>
+      <td width="38%"></td>
+      <td width="62%"></td>
+    </tr>
+    <tr>
+      <td width="38%" valign="top"><strong><small>SCAN_SETTING_PIXELBITS</small></strong></td>
+      <td width="62%"><small>The number of bits per pixel. Always 1 for binary data. When
+      divided by 3 for RGB data it gives the number of bits per sample. If a scanner supports
+      multiple RGB depths, a good way to find out what the intermediate ones are is to increment
+      from 16 or 24 by 2, and see when you get a <small>SCAN_BAD_PARAM </small>back from
+      scan_put_one_setting().</small></td>
+    </tr>
+    <tr>
+      <td width="38%"></td>
+      <td width="62%"></td>
+    </tr>
+    <tr>
+      <td width="38%" valign="top"><strong><small>SCAN_SETTING_RESOLUTION</small></strong></td>
+      <td width="62%"><small>Resolution of the scan in pixels per inch.</small></td>
+    </tr>
+    <tr>
+      <td width="38%"></td>
+      <td width="62%"></td>
+    </tr>
+    <tr>
+      <td width="38%" valign="top"><strong><small>SCAN_SETTING_BRIGHTNESS</small></strong></td>
+      <td width="62%"><small>Scanner-defined values representing the y-intercept of a scanner
+      tonemap line. Typically a range of 0 to 255 or -127 to +127, but it can be anything so
+      long as there is a continuum of integral values between the ones returned for the min/max
+      values.</small></td>
+    </tr>
+    <tr>
+      <td width="38%"></td>
+      <td width="62%"></td>
+    </tr>
+    <tr>
+      <td width="38%" valign="top"><strong><small>SCAN_SETTING_CONTRAST</small></strong></td>
+      <td width="62%"><small>Scanner-defined value representing the slope of a scanner tonemap
+      line. Same comments as for brightness.</small></td>
+    </tr>
+    <tr>
+      <td width="38%"></td>
+      <td width="62%"></td>
+    </tr>
+    <tr>
+      <td width="38%" valign="top"><strong><small>SCAN_SETTING_SCALING</small></strong></td>
+      <td width="62%"><small>A scaling factor in percent.</small></td>
+    </tr>
+    <tr>
+      <td width="38%"></td>
+      <td width="62%"></td>
+    </tr>
+    <tr>
+      <td width="38%" valign="top"><strong><small>SCAN_SETTING_WIDTH</small></strong></td>
+      <td width="62%"><small>Width of the image to be scanned, in pixels. You can only
+      &quot;get&quot; its current value, no other operation is supported.</small></td>
+    </tr>
+    <tr>
+      <td width="38%"></td>
+      <td width="62%"></td>
+    </tr>
+    <tr>
+      <td width="38%" valign="top"><strong><small>SCAN_SETTING_HEIGHT</small></strong></td>
+      <td width="62%"><small>Number of rows of image data, in pixels. You can only
+      &quot;get&quot; its current value, no other operation is supported.</small></td>
+    </tr>
+    <tr>
+      <td width="38%"></td>
+      <td width="62%"></td>
+    </tr>
+    <tr>
+      <td width="38%" valign="top"><strong><small>SCAN_SETTING_ROWBYTES</small></strong></td>
+      <td width="62%"><small>Number of bytes per row of image data. You can only &quot;get&quot;
+      its current value, no other operation is supported.</small></td>
+    </tr>
+    <tr>
+      <td width="38%"></td>
+      <td width="62%"></td>
+    </tr>
+    <tr>
+      <td width="38%" valign="top"><strong><small>SCAN_SETTING_TONEMAP</small></strong></td>
+      <td width="62%"><small>An array of int32 words which can be downloaded to the scanner so
+      that it can perform its own tonemapping. An int32 preceeding the array specifies the
+      number of elements in the array, and also implies the maximum value of any of the array
+      members. For example, if the first byte in this data is 256, then each element in the
+      ensuing array should fit in an unsigned 8-bit word with a maximum value of 255.</small><p><small>If
+      set, this overrides the values of brightness and contrast described above. The same
+      tonemap is used for all three channels in the RGB case.</small></td>
+    </tr>
+    <tr>
+      <td width="38%"></td>
+      <td width="62%"></td>
+    </tr>
+    <tr>
+      <td width="38%" valign="top"><strong><small>SCAN_SETTING_TONEMAP3</small></strong></td>
+      <td width="62%"><small>Three consecutive arrays of integers specifying the tonemap for the
+      RGB channels. An int32 preceeds the three arrays and describes the array elements just
+      like in the <small>SCAN_SETTING_TONEMAP</small> case.</small><p><small>If set, this
+      overrides the values of brightness and contrast described above.</small></td>
+    </tr>
+    <tr>
+      <td width="38%"></td>
+      <td width="62%"></td>
+    </tr>
+    <tr>
+      <td width="38%" valign="top"><strong><small>SCAN_SETTING_SPECIFIC</small></strong></td>
+      <td width="62%"><small>Any scanner-specific information that needs to be traded between
+      the application and scanner which is not supported directly by the ScannerBe API. It's
+      type is the void* field in the scan_value union.</small></td>
+    </tr>
+  </table>
+</blockquote>
+
+<h4>status_t <a name="scan_put_one_setting">scan_put_one_setting</a>( const scan_id id,
+const scan_setting_id setting, scan_value *value_ptr, scan_settings_mask *mask );</h4>
+
+<blockquote>
+  <p>Changes a current setting. See the section above for scan_get_one_setting for
+  descriptions of the scan_setting_id values, and the usage of the scan_value data type.</p>
+  <p>After this function returns, the location referenced by parameter mask will contain a
+  bit field indicating the side effects of the operation. That is, changing one of the
+  current scan parameters may affect other settings, or their min/max capabilities.
+  Scan_get_one_setting() or scan_get_settings() may then be called to find out the new
+  values.</p>
+  <p>If a setting is made before a scan_start call, the ScannerBe add-on has the option of
+  customizing its user interface based on those presets. For example, if you set the image
+  type to grayscale and the resolution to 100dpi, the add-on can preset its user interface
+  to those settings when it is initially shown, or maybe even freeze the controls such that
+  the user cannot change them. This is an additional feature an add-on may want to
+  implement, but it is not required. As an application writer, however, you must assume the
+  user will be allowed to change these values, and you must query the add-on after
+  scan_start() returns. There is no way to restrict settings to a certain set or range or
+  set of values.</p>
+</blockquote>
+
+<h4>status_t <a name="scan_start">scan_start</a>( const scan_id id );</h4>
+
+<blockquote>
+  <p>Instructs the add-on to display its user interface and wait for user selection of the
+  scan parameters. This function does not return until the user has taken the appropriate
+  action to invoke a scan, clicking a &quot;Scan&quot; button, for example.</p>
+  <p>It does nothing if the add-on does not support a user interface, and can be left out in
+  this case. If an add-on supports both driver and UI modes, then make sure you don't call
+  it when you don't want the user interface to show.</p>
+</blockquote>
+
+<h4>status_t <a name="scan_open_image">scan_open_image</a>( const scan_id id ), status_t <a
+name="scan_close_image">scan_close_image</a>( const scan_id id );</h4>
+
+<blockquote>
+  <p>Begins and ends the scan of a single image. After scan_open_image, the current settings
+  are &quot;locked in,&quot; and any calls to scan_put_one_setting (and, therefore,
+  scan_put_settings) will return an error code. If a scan is canceled by the user, make sure
+  to call call scan_close_image (or scan_close) to clean up. These two routines also bracket
+  each &quot;page&quot; of a scan loop, for example, if you are keying off of scan_adf_ready
+  to scan multiple pages.</p>
+</blockquote>
+
+<h4>status_t <a name="scan_data">scan_data</a>( const scan_id id, void *buffer, int32
+*count );</h4>
+
+<blockquote>
+  <p>Retrieves the image data from the scanner add-on. Pass a pointer to the location where
+  image data should be returned in the buffer parameter, and place the size of the buffer in
+  bytes in the location referenced by count.</p>
+  <p>When the function returns, count contains the actual number of bytes of image data that
+  has been returned, which is always in whole rows of image data. The add-on will calculate
+  the number of rows of image data that will fit into the buffer. This function should be
+  called repeatedly, and when the return code is SCAN_DATA_END, the scan is complete and
+  there is no more image data to transfer.</p>
+  <p>Image data is only padded on row boundaries in the case of thresholded black and white
+  data, in which case a row always starts on the next byte. A 0 represents white in
+  thresholded data (one bit per pixel), and black in gray or color data. Gray and color data
+  are big-endian. Color data is always represented as interleaved RGB, with red in the most
+  significant bits. Conversions to this format are the burden of the add-on writer.</p>
+</blockquote>
+
+<h4>bool <a name="scan_adf_ready">scan_adf_ready</a>( const scan_id id );</h4>
+
+<blockquote>
+  <p>If the scanner has an automatic document feeder attached to it which is loaded with
+  pages to scan, and is ready to feed them to the scanner, then this function returns true.
+  It assumes that on the next scan, the ADF will load the next page to scan. </p>
+</blockquote>
+
+<h4>void <a name="scan_error_message">scan_error_message</a>( const scan_id id, status_t
+error_id, char *msg );</h4>
+
+<blockquote>
+  <p>If one of the ScannerBe functions returns an error code, calling this will return an
+  appropriate error message in the buffer referenced by the msg parameter. A scanner add-on
+  implements this to provide the most informative error message for a given scanner. It will
+  always return a message since libscanbe will default to a generic &quot;scanner
+  error&quot; message if both it and the current scanner add-on failed to recognize the
+  error code.</p>
+</blockquote>
+
+<h2><a name="Add-on Notes">Add-on Notes</a></h2>
+
+<blockquote>
+  <p>The interface for writing a ScannerBe add-on is found in <font SIZE="1">ScanAddOn.h</font>,
+  and most of the information needed can be implied from the previous API reference. The
+  add-on interface is not exactly like the API, but is mostly like it. Here are some
+  additional notes on areas which may not be clear, plus a few things unique to the
+  add-ons..</p>
+  <h3>Structure</h3>
+  <p>The model is derived from the <font SIZE="1">Drivers.h </font>header file for BeOS. A
+  structure of pointers to &quot;hook&quot; functions is defined in your implementation, and
+  libscanbe locates this structure via the <font SIZE="1">publish_scanners() </font>and <font
+  SIZE="1">find_scanners() </font>functions. The publish function returns an array of names
+  by which a logical scanning device can be identified, while find function returns the
+  block of hook functions which implement the API.</p>
+  <p>One difference compared to the driver model is in the array of names returned by the
+  publish_scanners() function. In ScannerBe the even indexed entries are the internal names
+  of the add-ons which are passed to scan_open(), and should be similar to application
+  signatures. The odd indexed entries are the user-consumable names which, for add-ons with
+  an interface, will appear in the Scanner prefs applet. For example, an add-on might return
+  the following array in response to publish_scanners():</p>
+  <pre>
+	[0] &quot;application/x-vnd.jbm-flatbed&quot;
+	[1] &quot;Brand X Flatbed Series Scanners, v1.0&quot;
+	[2] &quot;application/x-vnd.jbm-multifunction&quot;
+	[3] &quot;Brand Y Multifunction Units, v1.0.1&quot;
+</pre>
+  <p>In this case, the add-on supports two kinds of scanning devices. Entries at index 0 and
+  2 are passed to scan_open() to identify the device to open a scanning session, and the
+  entries at index 1 and 3 can be used for whatever purpose, for example, displaying in a
+  preferences dialog if for some reason you don't care to install the Scanner prefs applet.
+  Arranging the names in this fashion is primarily to allow the add-on writer to present
+  support for multiple scanners to the user, even though the same add-on is being used. It
+  can be used for whatever other reason too.</p>
+  <p>The add-on hook functions get_setting and put_setting should be implemented with
+  efficiency in mind, since they may be called frequently by the application. For example,
+  the scaling or scan window may be set repeatedly based on control input from the user, and
+  the add-on should be able to respond as quickly as possible with updated width and height
+  information on subsequent queries.</p>
+  <h3>Resources</h3>
+  <p>The Scanner prefs applet finds which of the add-ons supports a user interface by
+  looking at a resource in the add-on's file. It is a single long integer in resource type
+  'GUIF' and id 0. This can be generated by using the following line in a .r file if you are
+  using the mwbres tool from Metrowerks:</p>
+  <font SIZE="1"><p>resource( 'GUIF', 0, &quot;GUI flag&quot; ) { 1, 0 }</font></p>
+  <p>There are two integers, each one a flag that should be 1 or 0. The first indicates it
+  supports and user interface, and the second indicates it supports being used as a driver
+  only. Add-ons can be both, or just one. This way the prefs applet can identify the flags
+  without actually opening any add-ons with scan_open(), which might require a scanner be
+  present. </p>
+  <h3>Configuration</h3>
+  <p>Note that the Target panel in the Project Settings may not be set up to process .r
+  files with mwbres. You may have to make an entry for file type &quot;text/*&quot;,
+  extension &quot;r&quot;, tool &quot;mwbres&quot;, and flag &quot;Postlink Stage&quot;
+  before a .r file in your project will automatically generate the resource and add it to
+  the final add-on file.</p>
+</blockquote>
+
+<h2>Examples</h2>
+
+<blockquote>
+  <p>The examples show ScannerBe used in different situations. The source code is included
+  in the ScannerBe SDK. As mentioned above, the ScanGlue module has more source code to read
+  and use. Here is an overview of what is in the source code.</p>
+  <h3><a name="Addon Skeleton">Addon Skeleton</a></h3>
+  <p>This skeleton shows how you might implement a scanner add-on. It doesn't actually do
+  anything, but it has in place most everything you have to worry about other than actually
+  talking to your scanner. For example, it shows how to setup the publish_scanners() and
+  find_scanner() routines that libscanbe uses to find the entry points into the add-on, and
+  how the strings are defined so it can be displayed in the Scanner Prefs applet.</p>
+  <p>In this particular case, the gui_flag.r file defines flags which say that its name will
+  not show up in the Scanner Prefs applet, but you can see that Skeeter makes use of
+  driver-mode add-ons, and should be able to see it show up in the Skeeter scanner selection
+  window. If you switch the flags around, you can see it show up in the Scanner Prefs
+  applet.</p>
+  <p>The prefs_info.r file defines a string which shows up when you double-click an entry in
+  the Scanner Prefs applet. It is here as an example, depending on how you define the flags
+  in the gui_flags.r file.</p>
+  <p>Notice how the ScanAddOnProto.h file is used to declare the function names for the
+  entry points that libscanbe calls into the add-on. You, of course, don't have to use the
+  same function names, all you have to do is change the names of the prototypes, and which
+  appear in the my_scanner_hooks structure.</p>
+  <p>You will probably want to change the way the my_cookie structure is used. This is just
+  an example of how you might coordinate the calculation of the number of whole lines which
+  will fit into the data buffer passed in by the caller, which every add-on has to do.</p>
+  <h3><a name="Becasso Add-on Example">Becasso Add-on</a></h3>
+  <p>As of the 1.0b2 release of the ScannerBe SDK, Becasso 1.1, which includes image
+  acquisition add-on support, has not been released yet. The source code for this add-on
+  example was based on an early development version of Becasso, and so it may need some
+  revision when Becasso is finally released. </p>
+  <p>The Becasso add-on example is a little bit more complicated, because you have to read
+  the Becasso add-on spec at the same time and understand both it and the ScannerBe
+  interface. But once that's done, it's an interesting example of how to make a ScannerBe
+  add-on do something that doesn't appear on the surface to &quot;fit&quot; the two designs.</p>
+  <p>ScannerBe assumes an application is going to try to &quot;pull&quot; an image from a
+  scanner. You makes calls via the ScannerBe API to setup the scanner, then make repeated
+  calls to get subseqent image buffers from it. Becasso, on the other hand, wants to be
+  &quot;pushed&quot; the image, i.e., when you're ready to send it an image, you notify it,
+  then it calls you to retrieve the image. In this case, the source code and accompanying
+  comments explains best how the ScannerBe calls are used to accomplish the task.</p>
+  <h3><a name="Command Line Example">Command Line</a></h3>
+  <p>As its name implies, the application produced by this project is meant to be run on a
+  command line in a Terminal window. It prints out the status of its operation as it scans
+  the full scanner bed, and passes the image along to the Datatypes library to convert into
+  a Targa file.</p>
+  <p>In one function, do_scan() it does a complete ScannerBe set of function calls, opening
+  the add-on, the scan_data loop, and post-processing the image in Datatypes. Not exactly
+  the model of good programming practice, but it concisely shows most of the API calls in
+  use. It also uses a mix of the stdio library routines for saving to disk, and the Be
+  Storage Kit routines for interfacing to the Datatypes library.</p>
+  <h3><a name="Image Editor Example">Image Editor</a></h3>
+  <p>This example displays a BView in a BWindow, and if you click in the view it invokes the
+  scanning process via the native ScannerBe API, and displays the resulting scanned image in
+  the view by converting the scanned data into a BBitmap. It is a straightforward example of
+  using the ScannerBe calls to transfer the image into a BBitmap. If you're looking for the
+  fastest way to get an image into your application though, check out the Simple Image
+  Editor example.</p>
+  <h3><a name="Simple Image Editor">Simple Image Editor</a></h3>
+  <p>This example is like the Image Editor example, except it encapsulates the entire
+  ScannerBe API into a single function call contained in the ScanGlue module, as described
+  earlier in this document. It's the quickest way to implement ScannerBe support in your
+  application, though you might end up tweaking the ScanGlue module for the particular needs
+  of your editor. You can start here, and as you gain more familiarity with the API, modify
+  it to suit your needs.</p>
+</blockquote>
+
+<h2><a name="License">License</a></h2>
+
+<blockquote>
+  <p>The ScannerBe shared library is freely distributable. The source code for it is
+  available in the SDK, which is also re-distributable if unmodified and kept in its
+  entirety. I intend to place the source code for the library in the public domain if it
+  becomes generally useful, but until such time I remain the copyright holder. Please inform
+  me of any fixes or enhancements and I will manage the maintenance releases.</p>
+</blockquote>
+
+<table border="0" width="100%" height="24">
+  <tr>
+    <td width="37%" height="18" align="center"><font SIZE="1">ScannerBe Manual v1.0b2</font></td>
+    <td width="23%" height="18" align="center"><font size="1">2/25/98</font></td>
+    <td width="40%" height="18" align="center"><font SIZE="1">Copyright © Jim Moy 1998, All
+    Rights Reserved</font></td>
+  </tr>
+</table>
+</body>
+</html>

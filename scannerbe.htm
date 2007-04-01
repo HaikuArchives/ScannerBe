@@ -1,0 +1,96 @@
+<html>
+
+<head>
+<title>ScannerBe - Scanning API for BeOS</title>
+</head>
+
+<body bgcolor="#FFFFFF">
+
+<table border="0" width="90%">
+  <tr>
+    <td width="11%"><a href="scannerbe.htm"><img src="images/scannerbe_icon.gif" alt="scannerbe_icon.gif (1309 bytes)" border="0" WIDTH="62" HEIGHT="47"></a></td>
+    <td width="89%"><h1>ScannerBe - Scanning API for BeOS</h1>
+    </td>
+  </tr>
+</table>
+
+<p><a href="scannerbe.zip">Download</a> the ScannerBe SDK, version 1.0b2</p>
+
+<p>This is currently in beta, please look over the API and SDK and give me <a href="mailto:jbm@verinet.com">feedback</a>. Please do not release any products based on
+the current documentation until version 1.0 is released. The SDK will not appear on <a href="http://www.be.com/beware/">BeWare</a> until it version 1.0 has been released.</p>
+
+<p>From the introduction in the <a href="scanbedoc.htm">documentation</a>:</p>
+
+<table border="0" width="100%">
+  <tr>
+    <td width="6%"></td>
+    <td width="78%"><em>ScannerBe is an API for applications that use image capture devices.
+    In particular, it was designed for flatbed desktop scanners. By implementing the ScannerBe
+    interface, an application can take advantage of multiple scanner makes and models without
+    having to write scanner-dependent code. By writing a ScannerBe add-on, a scanner can be
+    made available to these applications.</em></td>
+    <td width="16%"></td>
+  </tr>
+</table>
+
+<p>Here is a quick overview:</p>
+
+<table border="0" width="90%">
+  <tr>
+    <td width="23%" valign="top"><small><strong>C-based API</strong></small></td>
+    <td width="99%" valign="top"><small>A shared library, libscanbe.so, is installed in
+    ~/config/lib, and it loads scanner add-ons from ~/config/add-ons/Scanner. It is written in
+    C++, but exports a C API. Applications accessing libscanbe may be in C or C++, as may be
+    the add-ons called by the library.</small></td>
+  </tr>
+  <tr>
+    <td width="23%" valign="top"></td>
+    <td width="99%" valign="top"></td>
+  </tr>
+  <tr>
+    <td width="23%" valign="top"><small><strong>Standalone or Plugin</strong></small></td>
+    <td width="99%" valign="top"><small>The API supports add-ons which are simply a driver
+    abstraction layer, as well as a &quot;plugin&quot; mode to put up a user interface and
+    scan directly into applications. </small></td>
+  </tr>
+  <tr>
+    <td width="23%" valign="top"></td>
+    <td width="99%" valign="top"></td>
+  </tr>
+  <tr>
+    <td width="23%" valign="top"><small><strong>Skeeter</strong></small></td>
+    <td width="99%" valign="top"><small>The <a href="skeeter.htm">Skeeter</a> scanning utility
+    shows both sides of the API; it runs in standalone mode calling the driver-mode add-ons
+    through the API, and can also be invoked via the API to act as a plugin, scanning directly
+    into applications.</small></td>
+  </tr>
+  <tr>
+    <td width="23%" valign="top"></td>
+    <td width="99%" valign="top"></td>
+  </tr>
+  <tr>
+    <td width="23%" valign="top"><small><strong>SDK</strong></small></td>
+    <td width="99%" valign="top"><small>An <a href="scannerbe.zip">SDK</a> is available with
+    documentation and examples for application or add-on writers. </small></td>
+  </tr>
+  <tr>
+    <td width="23%" valign="top"></td>
+    <td width="99%" valign="top"></td>
+  </tr>
+  <tr>
+    <td width="23%" valign="top"><small><strong>License, Source</strong></small></td>
+    <td width="99%" valign="top"><small>The shared library is freely re-distributable, as is
+    the&nbsp; SDK which contains the its source code. Armed with the SDK and <a href="http://www.be.com">BeOS</a>, anyone should be able to replace either Skeeter or any
+    of my scanner support add-ons.</small></td>
+  </tr>
+  <tr>
+    <td width="23%" valign="top"></td>
+    <td width="99%" valign="top"></td>
+  </tr>
+</table>
+
+<p>Still interested? <a href="scannerbe.zip">Download</a> the SDK!</p>
+
+<p>Go to Jim Moy's <a href="http://www.verinet.com/~jbm">home page</a>, <a href="http://www.verinet.com/~jbm/bestuff.html">BeOS page</a>, and <a href="http://www.verinet.com/~jbm/be/scanner">BeOS Scanner page</a></p>
+</body>
+</html>
